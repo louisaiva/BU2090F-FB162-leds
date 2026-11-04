@@ -1,0 +1,172 @@
+
+const int DATA_PIN = 11;
+const int DATA_OSC_PIN = 10;
+
+const int CLOCK_PIN = 9;
+const int CLOCK_OSC_PIN = 8;
+
+const unsigned long SAMPLE_INTERVAL = 1000; // 1 ms
+
+const unsigned long DATA_SETUP_US = 2000;
+const unsigned long CLOCK_HIGH_US = 10000;
+const unsigned long DATA_LATCH_US = 2000;
+const unsigned long CLOCK_LOW_US = 10000;
+
+const unsigned long PATTERN_PAUSE_US = 300000;
+
+unsigned long lastSample = 0;
+
+uint16_t currentPattern = 0;
+
+
+// =====================================
+// SEND OSCILLOSCOPE DATA TO PROCESSING
+// =====================================
+
+void oscilloDigital() {
+
+  byte clockValue = digitalRead(CLOCK_OSC_PIN);
+  byte dataValue = digitalRead(DATA_OSC_PIN);
+
+  Serial.write(0xAA);
+
+  Serial.write(clockValue);
+  Serial.write(dataValue);
+
+  Serial.write((byte)(currentPattern & 0xFF));
+  Serial.write((byte)(currentPattern >> 8));
+}
+
+
+// =====================================
+// WAIT WHILE SAMPLING THE SIGNALS
+// =====================================
+
+void waitAndSample(unsigned long durationUs) {
+
+  unsigned long start = micros();
+
+  while ((unsigned long)(micros() - start) < durationUs) {
+
+    unsigned long now = micros();
+
+    if ((unsigned long)(now - lastSample) >= SAMPLE_INTERVAL) {
+
+      lastSample = now;
+
+      oscilloDigital();
+    }
+  }
+}
+
+
+// =====================================
+// SEND ONE 12-BIT PATTERN TO BU2090F
+// =====================================
+
+void sendBU2090(uint16_t pattern) {
+
+  currentPattern = pattern & 0x0FFF;
+
+  digitalWrite(CLOCK_PIN, LOW);
+  digitalWrite(DATA_PIN, LOW);
+
+  // Send 12 bits, MSB first
+  for (int i = 11; i >= 0; i--) {
+
+    byte bitValue = (currentPattern >> i) & 0x01;
+
+    digitalWrite(DATA_PIN, bitValue);
+    waitAndSample(DATA_SETUP_US);
+
+    // Rising edge: shift bit into register
+    digitalWrite(CLOCK_PIN, HIGH);
+    waitAndSample(CLOCK_HIGH_US);
+
+    // Return DATA low before the falling edge
+    digitalWrite(DATA_PIN, LOW);
+    waitAndSample(DATA_LATCH_US);
+
+    // Falling edge: no latch because DATA is LOW
+    digitalWrite(CLOCK_PIN, LOW);
+    waitAndSample(CLOCK_LOW_US);
+  }
+
+  // Separate latch operation
+  digitalWrite(DATA_PIN, HIGH);
+  waitAndSample(DATA_LATCH_US);
+
+  digitalWrite(CLOCK_PIN, HIGH);
+  waitAndSample(DATA_LATCH_US);
+
+  digitalWrite(CLOCK_PIN, LOW);
+  waitAndSample(DATA_LATCH_US);
+
+  digitalWrite(DATA_PIN, LOW);
+  waitAndSample(DATA_LATCH_US);
+}
+
+
+
+// =====================================
+// PATTERNS TESTS
+// =====================================
+
+void testAllPatterns() {
+
+  for (uint16_t pattern = 0; pattern <= 0x0FFF; pattern++) {
+
+    sendBU2090(pattern);
+
+    // Pause between patterns
+    waitAndSample(PATTERN_PAUSE_US);
+  }
+}
+
+void simpleTest() {
+
+  sendBU2090(0b000000000000);
+  waitAndSample(PATTERN_PAUSE_US);
+  sendBU2090(0b111111111111);
+  waitAndSample(PATTERN_PAUSE_US);
+}
+
+
+// =====================================
+// SETUP & LOOPS
+// =====================================
+
+void setup() {
+
+  pinMode(DATA_PIN, OUTPUT);
+  pinMode(CLOCK_PIN, OUTPUT);
+
+  pinMode(DATA_OSC_PIN, INPUT);
+  pinMode(CLOCK_OSC_PIN, INPUT);
+
+  digitalWrite(DATA_PIN, LOW);
+  digitalWrite(CLOCK_PIN, LOW);
+
+  Serial.begin(115200);
+
+  lastSample = micros();
+}
+
+void loop() {
+
+  digitalWrite(DATA_PIN, LOW);
+  digitalWrite(CLOCK_PIN, LOW);
+
+  sendBU2090(0b111111111111);
+  delay(2000);
+
+  sendBU2090(0b000000000000);
+  delay(2000);
+}
+// void loop() {
+
+//   // testAllPatterns();
+//   simpleTest();
+
+//   // Restart the test after all 4096 patterns
+// }
