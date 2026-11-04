@@ -1,22 +1,25 @@
 #include "Plan.h"
 
+// MAIN PINS, CONNECTED TO THE BOARD
 const int DATA_PIN = 9;
 const int CLOCK_PIN = 2;
 
+
+// OSCILLO PINS, FOR DEBUG ONLY
 const int DATA_OSC_PIN = 10;
 const int CLOCK_OSC_PIN = 3;
 
 const bool SEND_PROCESSING_PACKETS = false;
 const unsigned long SAMPLE_INTERVAL = 1000;
 
-const unsigned long DATA_SETUP_US = 5;
-const unsigned long CLOCK_HIGH_US = 20;
-const unsigned long DATA_LATCH_US = 5;
-const unsigned long CLOCK_LOW_US = 10;
+// RAISE THESE VALUES *100 to see the oscillo on the processing script
+const unsigned long DATA_SETUP_US = 5 /* * 100 */;
+const unsigned long CLOCK_HIGH_US = 20 /* * 100 */;
+const unsigned long DATA_LATCH_US = 5 /* * 100 */;
+const unsigned long CLOCK_LOW_US = 10 /* * 100 */;
 
 
 unsigned long lastSample = 0;
-
 uint16_t currentPattern = 0;
 
 
