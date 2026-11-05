@@ -218,10 +218,10 @@ void draw() {
   
   fill(0, 255, 0);
   textSize(14);
-  text("CLOCK - PIN 9", 20, 25);
+  text("CLOCK", 20, 25);
 
   fill(0, 150, 255);
-  text("DATA - PIN 11", 20, 45);
+  text("DATA", 20, 45);
 
   fill(255);
   textSize(11);

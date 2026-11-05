@@ -10,14 +10,49 @@ struct Plan {
     bool VFD;
 };
 
+inline Plan operator|(const Plan& a, const Plan& b)
+{
+    Plan result;
+
+    result.leds = a.leds | b.leds;
+    result.C = a.C || b.C;
+    result.VFD = a.VFD || b.VFD;
+
+    return result;
+}
+
+inline Plan operator&(const Plan& a, const Plan& b)
+{
+    Plan result;
+
+    result.leds = a.leds & b.leds;
+    result.C = a.C && b.C;
+    result.VFD = a.VFD && b.VFD;
+
+    return result;
+}
+
+inline Plan operator-(const Plan& a, const Plan& b)
+{
+    Plan result;
+
+    result.leds = a.leds & ~b.leds;
+    result.C = a.C && !b.C;
+    result.VFD = a.VFD && !b.VFD;
+
+    return result;
+}
+
 // DR to R bit positions
-#define PLAN_DR  (1U << 0)
-#define PLAN_D   (1U << 1)
-#define PLAN_DL  (1U << 2)
-#define PLAN_L   (1U << 3)
-#define PLAN_UL  (1U << 4)
-#define PLAN_U   (1U << 5)
-#define PLAN_UR  (1U << 6)
-#define PLAN_R   (1U << 7)
+#define DR  (1U << 0)
+#define D   (1U << 1)
+#define DL  (1U << 2)
+#define L   (1U << 3)
+#define UL  (1U << 4)
+#define U   (1U << 5)
+#define UR  (1U << 6)
+#define R   (1U << 7)
+#define ALL   0xFF
+#define NONE   0x00
 
 #endif
