@@ -13,19 +13,19 @@ const int DATA_OSC_PIN = 10;
 const int CLOCK_OSC_PIN = 3;
 
 // TOGGLE THE OSCILLO
-const bool SEND_PROCESSING_PACKETS = true;
-
-// RAISE THESE VALUES *100 to see the oscillo on the processing script
-const unsigned long DATA_SETUP_US = 5 /* * 100 */;
-const unsigned long CLOCK_HIGH_US = 20 /* * 100 */;
-const unsigned long DATA_LATCH_US = 5 /* * 100 */;
-const unsigned long CLOCK_LOW_US = 10 /* * 100 */;
+const bool SEND_PROCESSING_PACKETS = false;
+// activating the above bool will automatically
+// multiply the 4 below values by 100
+// to see the oscillo on the processing script
+const unsigned long DATA_SETUP_US = 5;
+const unsigned long CLOCK_HIGH_US = 20;
+const unsigned long DATA_LATCH_US = 5;
+const unsigned long CLOCK_LOW_US = 10;
 
 // processing oscillo useful variables
 const unsigned long SAMPLE_INTERVAL = 1000;
 unsigned long lastSample = 0;
 uint16_t currentPattern = 0;
-
 
 // ANIM TIMINGS
 const unsigned long ms = 1000;
@@ -84,6 +84,8 @@ void waitAndSample(unsigned long durationUs) {
 void sendBU2090(uint16_t pattern) {
 
   currentPattern = pattern & 0x0FFF;
+  unsigned long time_mult = 1;
+  if (SEND_PROCESSING_PACKETS) { time_mult = 100; }
 
   digitalWrite(CLOCK_PIN, LOW);
 
@@ -92,11 +94,11 @@ void sendBU2090(uint16_t pattern) {
     byte bitValue = (currentPattern >> i) & 0x01;
 
     digitalWrite(DATA_PIN, bitValue);
-    waitAndSample(DATA_SETUP_US);
+    waitAndSample(DATA_SETUP_US * time_mult);
 
     // Rising edge: shift bit
     digitalWrite(CLOCK_PIN, HIGH);
-    waitAndSample(CLOCK_HIGH_US);
+    waitAndSample(CLOCK_HIGH_US * time_mult);
 
     if (i == 0) {
       digitalWrite(DATA_PIN, HIGH);
@@ -104,27 +106,27 @@ void sendBU2090(uint16_t pattern) {
       digitalWrite(DATA_PIN, LOW);
     }
 
-    waitAndSample(DATA_LATCH_US);
+    waitAndSample(DATA_LATCH_US * time_mult);
 
     // Falling edge
     digitalWrite(CLOCK_PIN, LOW);
 
     if (i == 0) {
 
-      waitAndSample(DATA_LATCH_US);
+      waitAndSample(DATA_LATCH_US * time_mult);
 
       digitalWrite(DATA_PIN, LOW);
 
-      waitAndSample(CLOCK_LOW_US - DATA_LATCH_US);
+      waitAndSample((CLOCK_LOW_US - DATA_LATCH_US) * time_mult);
 
     } else {
 
-      waitAndSample(CLOCK_LOW_US);
+      waitAndSample(CLOCK_LOW_US * time_mult);
     }
   }
 
   digitalWrite(DATA_PIN, LOW);
-  waitAndSample(DATA_SETUP_US);
+  waitAndSample(DATA_SETUP_US * time_mult);
 }
 
 #endif
