@@ -38,7 +38,7 @@ void setup()
 const SequenceRef programs[] = 
 {
     build(circlified_idle),
-    build(idle),
+    build(losanjina),
     build(wavy)
 };
 int current_seq = 0;

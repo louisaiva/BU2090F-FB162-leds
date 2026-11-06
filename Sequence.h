@@ -53,6 +53,23 @@ const Sequence<6> idle =
     },
     { 4, 3, 5, 1, 1, 1}
 };
+const Sequence<11> losanjina =
+{
+    {
+        build(loop_clockwise),
+        build(loop_inverse),
+        build(loop_clockwise),
+        build(loop_inverse),
+        build(loop_clockwise),
+        build(triangulate),
+        build(squary_blink),
+        build(losanj_5),
+        build(sec_off),
+        build(DR_blink),
+        build(loop_inverse),
+    },
+    { 3, 3, 3, 3, 3, 1, 2, 2000, 2, 2, 3}
+};
 const Sequence<4> circlify =
 {
     {

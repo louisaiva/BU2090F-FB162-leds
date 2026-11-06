@@ -13,6 +13,26 @@ struct Anim {
 
 
 
+template <size_t N, size_t M>
+Anim<N + M> operator|(const Anim<N>& a, const Anim<M>& b)
+{
+    Anim<N + M> result;
+
+    for (size_t i = 0; i < N; i++)
+    {
+        result.plans[i] = a.plans[i];
+        result.times[i] = a.times[i];
+    }
+
+    for (size_t i = 0; i < M; i++)
+    {
+        result.plans[N + i] = b.plans[i];
+        result.times[N + i] = b.times[i];
+    }
+
+    return result;
+}
+
 
 // ==========================================
 // ANIMS DEFINITIONS
@@ -27,23 +47,26 @@ const Anim<1> circly = { { CIRCLE }, { 100 } };
 const Anim<1> losanj = { { LOSANJ }, { 100 } };
 const Anim<1> squary = { { SQUARE }, { 100 } };
 const Anim<4> vfd_blink = { { VFD, OFF, VFD, OFF }, { 500*2.5 , 100*2.5 , 50*2.5 , 3000 } };
+const Anim<4> DR_blink = { { LED_DR, OFF, LED_DR, OFF }, { 300 , 100 , 50 , 100 } };
 const Anim<5> full_blink = { { VFD, ON, OFF, ON, TRI_U }, { 100 , 50, 150, 400 , 200 } };
+const Anim<6> squary_blink = { { SQUARE, SQUAR8 - LED_UR, OFF, SQUAR8, DIAG_UR, OFF }, { 100 , 50, 150, 250 , 300, 200 } };
 
 // faded anims (appears less bright)
 const Anim<2> on_10 = { { ON, OFF }, { 1,10 } };
 const Anim<2> on_5 = { { ON, OFF }, { 1,20 } };
+const Anim<2> losanj_5 = { { LOSANJ, OFF }, { 1,20 } };
 
 // triangle / loops anims
 const Anim<8> triangulate = {
-  { TRI_UL, TRI_U, TRI_UR, TRI_R, TRI_DR, TRI_D, TRI_DL, TRI_L },
-  { 300 , 75, 300, 75 , 300 , 75 ,300 , 75 }
+  { TRI_DR, TRI_D, TRI_DL, TRI_L, TRI_UL, TRI_U, TRI_UR, TRI_R },
+  { 100 , 100, 100, 100 , 100 , 100 ,100 , 100 }
 };
 const Anim<8> loop_inverse = {
-  { LED_R , LED_UR , LED_U , LED_UL , LED_L , LED_DL , LED_D , LED_DR },
+  { LED_DR, LED_R , LED_UR , LED_U , LED_UL , LED_L , LED_DL , LED_D  },
   { 150 , 150 , 150 , 150 , 150 , 150 , 150 , 150 },
 };
 const Anim<8> loop_clockwise = {
-  { LED_R , LED_DR , LED_D , LED_DL , LED_L , LED_UL , LED_U , LED_UR },
+  { LED_DR , LED_D , LED_DL , LED_L , LED_UL , LED_U , LED_UR , LED_R },
   { 150 , 150 , 150 , 150 , 150 , 150 , 150 , 150 },
 };
 
