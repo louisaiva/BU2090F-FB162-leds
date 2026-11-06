@@ -75,6 +75,29 @@ const Anim<7> on_to_UL = {
 
 
 
+// prog indicators
+const Anim<1> ind_1 = { { LED_UL }, { 2500 } };
+const Anim<1> ind_2 = { { LED_U }, { 2500 } };
+const Anim<1> ind_3 = { { LED_UR }, { 2500 } };
+const Anim<1> ind_4 = { { LED_L }, { 2500 } };
+const Anim<1> ind_5 = { { LED_R }, { 2500 } };
+const Anim<1> ind_6 = { { LED_DL }, { 2500 } };
+const Anim<1> ind_7 = { { LED_D }, { 2500 } };
+const Anim<1> ind_8 = { { LED_DR }, { 2500 } };
+const Anim<1> ind_9 = { { VFD }, { 2500 } };
+const Anim<1> ind_off = { { CIRCLE }, { 2500 } };
+const Anim<1> prog_indicators[] = 
+{
+    ind_1,
+    ind_2,
+    ind_3,
+    ind_4,
+    ind_5,
+    ind_6,
+    ind_7,
+    ind_8,
+    ind_9
+};
 
 
 
@@ -96,7 +119,11 @@ void playAnim(const void* data)
 {
     const Anim<N>& anim =
         *static_cast<const Anim<N>*>(data);
-
+    playAnim(anim);
+}
+template <size_t N>
+void playAnim(const Anim<N>& anim)
+{
     for (size_t i = 0; i < N; i++)
     {
         uint16_t pattern = planToBU2090(anim.plans[i]);
@@ -116,6 +143,8 @@ AnimRef build(const Anim<N>& anim)
         playAnim<N>
     };
 }
+
+const AnimRef anim_off = build(off);
 
 
 #endif

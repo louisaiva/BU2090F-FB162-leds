@@ -18,7 +18,6 @@ void setup()
     pinMode(DATA_OSC_PIN, INPUT);
     pinMode(CLOCK_OSC_PIN, INPUT);
     pinMode(SWITCH_OUT_PIN, OUTPUT);
-    // pinMode(SWITCH_IN_PIN, INPUT);
 
     // write first things
     digitalWrite(SWITCH_OUT_PIN, HIGH);
@@ -36,10 +35,6 @@ void setup()
 // MAIN LOOP
 // ==========================================
 
-// const auto seq_0 = circlified_idle;
-// const auto seq_1 = idle;
-// const auto seq_2 = wavy;
-
 const SequenceRef programs[] = 
 {
     build(circlified_idle),
@@ -50,14 +45,36 @@ int current_seq = 0;
 
 void loop()
 {
-    current_seq = current_seq % PROG_COUNT;
+    if (current_seq >= PROG_COUNT)
+    {
+        // means it is off
+        if (refreshSwitch())
+        {
+            current_seq = 0;
+            if (LOG_PROG && current_seq >= PROG_COUNT) { Serial.println("[PROG] >>>>>>> ON"); }
+            playAnim(prog_indicators[0]);
+        }
+        return;
+    }
+
     SequenceRef seq = programs[current_seq];
 
     int seq_result = seq.play();
     if (seq_result == 1)
     {
-        current_seq = (current_seq + 1) % PROG_COUNT;
+        current_seq++;
+
+        if (current_seq >= PROG_COUNT)
+        {
+            // we want to turn off
+            if (LOG_PROG) { Serial.println("[PROG] >>>>>>> OFF"); }
+            playAnim(ind_off);
+            playAnim(off);
+            return;
+        }
+
         // will automatically play next seq next loop
         if (LOG_PROG) { Serial.println("[PROG] >>>>>>> PLAYING NEXT SEQUENCE : " + String(current_seq)); }
+        playAnim(prog_indicators[current_seq]);
     }
 }
