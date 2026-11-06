@@ -2,6 +2,7 @@
 #define SEQUENCE_H
 
 #include <Arduino.h>
+#include "Low.h"
 #include "Anim.h"
 
 template <size_t N>
@@ -80,6 +81,56 @@ const auto circlified_idle = idle | circlify | circlify | circlify | circlify;
 
 
 
+
+
+// ==========================================
+// SEQUENCE REF (needed to store a list of different sized sequences)
+// ==========================================
+
+
+struct SequenceRef {
+    const void* data;
+    int (*play_seq)(const void*);
+
+    int play() const {
+        return play_seq(data);
+    }
+};
+
+// ==========================================
+// SEQUENCE METHODS
+// ==========================================
+template <size_t N>
+int play(const Sequence<N>& seq)
+{
+    size_t i = 0;
+    while (true)
+    {
+        if (LOG_SEQ) { Serial.println("[SEQ] " + String(i) + " : Playing anim for " + String(seq.reps[i]) + " repetitions"); }
+        for (uint8_t j = 0; j < seq.reps[i]; j++)
+        {
+            seq.anims[i].play(seq.anims[i].data);
+            if (refreshSwitch()) { return 1; }
+        }
+        i = (i + 1) % N;
+    }
+    return 0;
+}
+
+template <size_t N>
+int playSequence(const void* data)
+{
+    const Sequence<N>& seq =
+        *static_cast<const Sequence<N>*>(data);
+
+    return play(seq);
+}
+
+template <size_t N>
+SequenceRef build(const Sequence<N>& seq)
+{
+    return { &seq, playSequence<N> };
+}
 
 
 #endif

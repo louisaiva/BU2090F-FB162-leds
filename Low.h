@@ -3,14 +3,48 @@
 
 #include <Arduino.h>
 
+
+/*
+
+PINS
+
+*/
+
 // MAIN PINS, CONNECTED TO THE BOARD
 const int DATA_PIN = 9;
 const int CLOCK_PIN = 2;
 
-
 // OSCILLO PINS, FOR DEBUG ONLY
 const int DATA_OSC_PIN = 10;
 const int CLOCK_OSC_PIN = 3;
+
+
+// SWITCH PINS
+const int SWITCH_IN_PIN = A3;
+const int SWITCH_OUT_PIN = 13;
+
+
+/*
+
+SWITCH & PROGRAMS
+
+*/
+
+// Constants
+const float V_REF = 5.0;     // Analog reference voltage (e.g., 5V or 3.3V)
+const float R_BITS = 10.0;   // ADC resolution (bits)
+const float ADC_STEPS = (1 << int(R_BITS)) - 1; // Number of steps (2^R_BITS - 1)
+
+
+bool LAST_SWITCH = 0;
+const int PROG_COUNT = 3;
+
+
+/*
+
+PACKET TIMING & OSCILLO
+
+*/
 
 // TOGGLE THE OSCILLO
 const bool SEND_PROCESSING_PACKETS = false;
@@ -27,9 +61,28 @@ const unsigned long SAMPLE_INTERVAL = 1000;
 unsigned long lastSample = 0;
 uint16_t currentPattern = 0;
 
+/*
+
+ANIM TIMING
+
+*/
+
+
 // ANIM TIMINGS
 const unsigned long ms = 1000;
 const unsigned long tick = 400;
+
+
+/*
+
+LOGS
+
+*/
+
+const bool LOG_ANIM = false;
+const bool LOG_SWITCH = false;
+const bool LOG_SEQ = true;
+const bool LOG_PROG = true;
 
 
 
@@ -76,6 +129,38 @@ void waitAndSample(unsigned long durationUs) {
   }
 }
 
+
+// ==========================================
+// CHECK SWITCH STATUS
+// ==========================================
+bool refreshSwitch()
+{
+    bool switch_is_on = true;
+    int nb_reps = 30;
+    for (int i=0;i<nb_reps;i++)
+    {
+        int new_switch = analogRead(SWITCH_IN_PIN);
+
+        int rawValue = analogRead(SWITCH_IN_PIN); // Read the analog input
+        float voltage = (rawValue / ADC_STEPS) * V_REF; // Convert to voltage
+        if (LOG_SWITCH) { Serial.println("[SWITCH] reading switch : " + String(i) + " with voltage : " + String(voltage)); }
+        if (voltage < 4.90)
+        {
+            switch_is_on = false;
+            break;
+        }
+    }
+    bool switch_was_toggled = false;
+
+    // if (LOG_SWITCH) { Serial.println("[SWITCH] last switch : " + String(LAST_SWITCH) + "    | voltage : " + String(voltage)); }
+    if (switch_is_on != LAST_SWITCH)
+    {
+        switch_was_toggled = true;
+        if (LOG_PROG) { Serial.println("[PROG] >>>>>>> SWITCH DETECTED : " + String(switch_is_on)); }
+    }
+    LAST_SWITCH = switch_is_on;
+    return switch_was_toggled;
+}
 
 // ==========================================
 // BU2090F TRANSMISSION

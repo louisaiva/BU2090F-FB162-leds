@@ -117,7 +117,7 @@ void animate(const Plan (&anim)[N])
 		uint16_t currentPattern = planToBU2090(anim[i]);
 		sendBU2090(currentPattern);
 		i = translate(i, 1, count);
-		Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)currentPattern, HEX));
+		if (LOG_ANIM) { Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)currentPattern, HEX)); }
 		waitAndSample(500*ms); // default time delay
 	}
 }
@@ -137,7 +137,7 @@ void animate(const Plan (&anim)[N], const int (&timings)[M])
 	{
 		uint16_t currentPattern = planToBU2090(anim[i]);
 		sendBU2090(currentPattern);
-		Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)currentPattern, HEX));
+		if (LOG_ANIM) { Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)currentPattern, HEX)); }
 		waitAndSample(timings[i]*tick);
 		i = translate(i, 1, count);
 	}
@@ -151,7 +151,7 @@ void animate(const Anim<N>& anim)
 	{
 		uint16_t pattern = planToBU2090(anim.plans[i]);
 		sendBU2090(pattern);
-		// Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)pattern, HEX) + ".  Now waiting for " + String());
+		// if (LOG_ANIM) { Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)pattern, HEX) + ".  Now waiting for " + String()); }
 		waitAndSample(anim.times[i]*tick);
 		i = (i + 1) % N;
 	}

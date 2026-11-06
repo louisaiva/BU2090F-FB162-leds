@@ -101,7 +101,7 @@ void playAnim(const void* data)
     {
         uint16_t pattern = planToBU2090(anim.plans[i]);
         sendBU2090(pattern);
-        Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)pattern, HEX) + ".  Now waiting for " + String(anim.times[i]) + " ticks   (" + String((anim.times[i] * tick) / 1000) + " ms)");
+        if (LOG_ANIM) { Serial.println("[ANIM] " + String(i) + " : " + String((uint16_t)pattern, HEX) + ".  Now waiting for " + String(anim.times[i]) + " ticks   (" + String((anim.times[i] * tick) / 1000) + " ms)"); }
         waitAndSample(anim.times[i] * tick);
     }
 }
